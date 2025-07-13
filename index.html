@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vrtis Grind Co - Leave a Review</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+    label { display: block; margin-top: 15px; }
+    textarea { width: 100%; height: 80px; }
+    button { margin-top: 20px; padding: 10px; width: 100%; font-size: 16px; }
+    .stars { display: flex; gap: 5px; }
+    .star { font-size: 24px; cursor: pointer; color: #ccc; }
+    .star.selected { color: gold; }
+  </style>
+</head>
+<body>
+  <h2>Leave a Review</h2>
+  <form id="reviewForm">
+    <label>Rating:</label>
+    <div class="stars">
+      <span class="star" data-value="1">&#9733;</span>
+      <span class="star" data-value="2">&#9733;</span>
+      <span class="star" data-value="3">&#9733;</span>
+      <span class="star" data-value="4">&#9733;</span>
+      <span class="star" data-value="5">&#9733;</span>
+    </div>
+    <label for="reviewText">Your Review:</label>
+    <textarea id="reviewText" required></textarea>
+    <button type="submit">Submit Review</button>
+  </form>
+
+  <script>
+    const stars = document.querySelectorAll('.star');
+    let selectedRating = 0;
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.getAttribute('data-value'));
+        stars.forEach(s => s.classList.toggle('selected', parseInt(s.getAttribute('data-value')) <= selectedRating));
+      });
+    });
+
+    const form = document.getElementById('reviewForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (selectedRating === 0) {
+        alert('Please select a rating.');
+        return;
+      }
+      const reviewText = document.getElementById('reviewText').value.trim();
+      if (!reviewText) {
+        alert('Please enter your review.');
+        return;
+      }
+
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: selectedRating, review: reviewText }),
+      });
+
+      if (res.ok) {
+        alert('Thanks for your review!');
+        form.reset();
+        stars.forEach(s => s.classList.remove('selected'));
+        selectedRating = 0;
+      } else {
+        alert('Failed to submit review. Try again later.');
+      }
+    });
+  </script>
+</body>
+</html>
